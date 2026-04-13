@@ -2,9 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# 1. Instalar git (Vital para dependencias externas de GitHub)
-# --no-cache mantiene la imagen pequeña al no guardar los índices de paquetes
-RUN apk add --no-cache git
+# Instalar git y bash (bash es útil para entrar al contenedor a debugear)
+RUN apk add --no-cache git bash
 
 # 2. Instalar pnpm
 RUN npm install -g pnpm
