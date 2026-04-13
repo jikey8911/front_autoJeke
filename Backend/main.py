@@ -46,34 +46,16 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
             welcome_json = json.loads(welcome_msg)
             nonce = welcome_json.get("payload", {}).get("nonce", "")
             
-            # 2. Construir el Handshake v3 de OpenClaw
+            # 2. Construir el Handshake simplificado
             connect_payload = {
                 "type": "req",
                 "id": "1",
                 "method": "connect",
                 "params": {
-                    "minProtocol": 3,
-                    "maxProtocol": 3,
                     "client": {
-                        "id": "cli",
-                        "version": "1.2.3",
-                        "platform": "macos",
-                        "mode": "operator"
-                    },
-                    "role": "operator",
-                    "scopes": ["operator.read", "operator.admin"],
-                    "caps": [],
-                    "commands": [],
-                    "permissions": {},
-                    "auth": { "token": token },
-                    "locale": "en-US",
-                    "userAgent": "openclaw-cli/1.2.3", # Mimics the official CLI
-                    "device": {
-                        "id": "automata_backend_fingerprint",
-                        "publicKey": "base64_encoded_dummy_key",
-                        "signature": "base64_encoded_dummy_sig",
-                        "signedAt": 1737264000000,
-                        "nonce": nonce
+                        "mode": "controller",
+                        "version": "1.0.0",
+                        "key": token
                     }
                 }
             }
