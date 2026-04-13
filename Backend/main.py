@@ -35,7 +35,9 @@ def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict = None)
             response = requests.post(url, headers=headers, json=payload, timeout=30)
 
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        print(f"[GATEWAY-RESPONSE] {endpoint}: {json.dumps(data, indent=2)}")
+        return data
     except requests.exceptions.RequestException as e:
         print(f"[ERROR-GATEWAY] Fallo en {endpoint}: {str(e)}")
         # Estructura de error consistente para el Frontend
