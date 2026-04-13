@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: automata_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - OPENCLAW_WS_URL=ws://openclaw_instance:10424
+    networks:
+      - automata_net
+
+  frontend:
+    build: 
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: automata_frontend
+    ports:
+      - "3000:5173" # Expone el puerto 3000 en el host, enrutado al 5173 de Vite
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    networks:
+      - automata_net
+
+networks:
+  automata_net:
+    driver: bridge
