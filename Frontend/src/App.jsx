@@ -15,7 +15,7 @@ function App() {
 
   const fetchData = async () => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://automata_backend:5000';
     const endpoints = ['agents', 'opportunities', 'running_tasks', 'balance', 'status', 'mitosis', 'kill'];
     
     const results = {};
