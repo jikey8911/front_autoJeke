@@ -49,6 +49,28 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
         print(f"Error WS: {e}")
         raise HTTPException(status_code=500, detail=f"Error al comunicarse por WebSockets con OpenClaw Gateway: {e}")
 
+@app.get("/test_ws")
+async def test_ws_connection():
+    """
+    Endpoint de prueba para confirmar si el backend puede alcanzar y conectar
+    con el WebSocket de OpenClaw. No pide datos, solo prueba el handshake.
+    """
+    try:
+        # Solo intenta abrir y cerrar la conexión
+        async with websockets.connect(OPENCLAW_WS_URL, close_timeout=2) as websocket:
+            return {
+                "status": "success",
+                "message": "Conexión WebSocket a OpenClaw exitosa.",
+                "url_tested": OPENCLAW_WS_URL
+            }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": "Fallo al conectar con el WebSocket de OpenClaw.",
+            "url_tested": OPENCLAW_WS_URL,
+            "details": str(e)
+        }
+
 @app.get("/agents")
 async def get_agents():
     """
