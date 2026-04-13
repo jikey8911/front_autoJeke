@@ -2,20 +2,19 @@ version: '3.8'
 
 services:
   backend:
-    build:
+    build: 
       context: ./Backend
       dockerfile: Dockerfile
     container_name: automata_backend
     ports:
       - "5000:5000"
     environment:
-      # Volvemos a usar el nombre DNS de Docker. El backend sí puede resolverlo.
+      # Si están en la misma red de docker "bridge" u otra, el nombre del contenedor funcionará
       - OPENCLAW_WS_URL=ws://openclaw_instance:10424
-    networks:
-      - automata_net
+    network_mode: bridge
 
   frontend:
-    build:
+    build: 
       context: ./Frontend
       dockerfile: Dockerfile
     container_name: automata_frontend
@@ -25,9 +24,4 @@ services:
       - backend
     environment:
       - VITE_API_URL=http://163.192.114.190:5000
-    networks:
-      - automata_net
-
-networks:
-  automata_net:
-    driver: bridge
+    network_mode: bridge
