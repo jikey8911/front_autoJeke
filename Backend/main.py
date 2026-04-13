@@ -39,8 +39,17 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
     try:
         # Timeout extendido a 60s: El agente IA puede tomar tiempo en leer archivos y formular la respuesta JSON
         async with websockets.connect(OPENCLAW_WS_URL) as websocket:
+            # 1. Esperar y descartar el mensaje de bienvenida/challenge de OpenClaw
+            welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Recibido saludo de OpenClaw: {welcome_msg}")
+
+            # 2. Enviar nuestra petición
             await websocket.send(json.dumps(payload))
+            print(f"[Backend] Petición enviada: {payload}")
+
+            # 3. Esperar la respuesta real a nuestra petición
             response_str = await asyncio.wait_for(websocket.recv(), timeout=60.0)
+            print(f"[Backend] Respuesta recibida: {response_str}")
             
             try:
                 return json.loads(response_str)
