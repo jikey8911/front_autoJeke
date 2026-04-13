@@ -3,7 +3,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@tu-usuario/jeikei-ui/dist/**/*.js"
+    "./node_modules/@jikey8911/jeikei-ui/dist/**/*.js"
   ],
   theme: {
     extend: {
