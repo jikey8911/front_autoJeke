@@ -18,9 +18,7 @@ app.add_middleware(
 )
 
 # URL del WebSockets de OpenClaw Gateway
-# Si corre local: ws://127.0.0.1:10424
-# Si corre en Docker accediendo al host: ws://host.docker.internal:10424
-OPENCLAW_WS_URL = os.getenv("OPENCLAW_WS_URL", "ws://127.0.0.1:10424")
+OPENCLAW_WS_URL = os.getenv("OPENCLAW_WS_URL", "ws://openclaw_instance:10424")
 
 class OpenClawRequest(BaseModel):
     data_needed: str
