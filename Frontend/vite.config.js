@@ -20,6 +20,13 @@ export default defineConfig({
   server: {
     host: true, // Importante para Docker
     port: 3000, // Vite ahora corre nativamente en el puerto 3000
+    proxy: {
+      '/api': {
+        target: 'http://automata_backend:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
   build: {
     cssMinify: false, // lightningcss no soporta @theme (Tailwind v4) de jeikei-ui

@@ -15,8 +15,8 @@ function App() {
   const [backendStatus, setBackendStatus] = useState("CHECKING...");
 
   const testBackendConnection = async () => {
-    // Usar la IP pública para que el navegador del usuario final pueda resolverla
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
+    // Vite Proxy: Usamos ruta relativa /api para que Vite la redirija a automata_backend:5000
+    const apiUrl = '/api';
     try {
       const response = await fetch(`${apiUrl}/test_ws`);
       if (response.ok) {
@@ -32,8 +32,8 @@ function App() {
 
   const fetchData = async () => {
     setLoading(true);
-    // Usar la IP pública para que el navegador del usuario final pueda resolverla
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
+    // Vite Proxy: Usamos ruta relativa /api
+    const apiUrl = '/api';
     const endpoints = ['agents', 'opportunities', 'running_tasks', 'balance', 'status', 'mitosis', 'kill'];
     
     const results = {};
