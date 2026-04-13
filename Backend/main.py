@@ -55,10 +55,10 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                     "minProtocol": 3,
                     "maxProtocol": 3,
                     "client": {
-                        "id": "cli", # OpenClaw solo acepta clientes oficiales ("cli", "ios", etc.)
+                        "id": "cli",
                         "version": "1.2.3",
                         "platform": "linux",
-                        "mode": "standalone" # El CLI suele correr en modo standalone o daemon
+                        "mode": "daemon" # Si no era operator ni standalone, intentamos daemon
                     },
                     "role": "operator",
                     "scopes": ["operator.read", "operator.admin"],
