@@ -9,8 +9,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Si el nombre DNS de docker no resuelve, forzamos la IP del gateway que funcionó antes
-      - OPENCLAW_WS_URL=ws://172.21.0.3:10424
+      # Volvemos a usar el nombre DNS de Docker. El backend sí puede resolverlo.
+      - OPENCLAW_WS_URL=ws://openclaw_instance:10424
     networks:
       - automata_net
 
