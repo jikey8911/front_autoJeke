@@ -9,11 +9,11 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Usamos el nombre del contenedor de openclaw tal cual
-      # Usamos el nombre del contenedor de openclaw tal cual
-      - OPENCLAW_WS_URL=ws://openclaw_instance:10424
+      # Inyectamos la URL y el Token para evitar hardcode en main.py
+      - OPENCLAW_GATEWAY_URL=http://openclaw_instance:10424
+      - OPENCLAW_TOKEN=8941487567606a620353868ebbcd32f73ba9b26de1551c09
     networks:
-      - automataopenclaw_automata_net
+      - automata_net
 
   frontend:
     build: 
@@ -21,15 +21,14 @@ services:
       dockerfile: Dockerfile
     container_name: automata_frontend
     ports:
-      - "3000:3000" # Expone el puerto 3000 directamente
+      - "3000:3000"
     depends_on:
       - backend
-    environment:
-      - VITE_API_URL=http://163.192.114.190:5000
     networks:
-      - automataopenclaw_automata_net
+      - automata_net
 
-# Declaramos la red externa a la que queremos unirnos
+# Usamos la red externa donde corre OpenClaw
 networks:
-  automataopenclaw_automata_net:
+  automata_net:
+    name: automataopenclaw_automata_net
     external: true

@@ -16,10 +16,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuración del Gateway (Usando API nativa v1 sobre el puerto 10424)
-PORT = 10424
-TOKEN = "8941487567606a620353868ebbcd32f73ba9b26de1551c09"
-OPENCLAW_API_BASE = f"http://openclaw_instance:{PORT}/v1"
+# Configuración del Gateway (Inyectada por Docker-Compose)
+TOKEN = os.getenv("OPENCLAW_TOKEN", "8941487567606a620353868ebbcd32f73ba9b26de1551c09")
+GATEWAY_BASE = os.getenv("OPENCLAW_GATEWAY_URL", "http://openclaw_instance:10424")
+OPENCLAW_API_BASE = f"{GATEWAY_BASE}/v1"
 
 def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict = None):
     url = f"{OPENCLAW_API_BASE}/{endpoint}"
