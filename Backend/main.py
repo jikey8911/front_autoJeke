@@ -46,17 +46,20 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
             welcome_json = json.loads(welcome_msg)
             nonce = welcome_json.get("payload", {}).get("nonce", "")
             
-            # 2. Construir el Handshake simplificado
+            # 2. Construir el Handshake Estricto
             connect_payload = {
                 "type": "req",
                 "id": "1",
                 "method": "connect",
                 "params": {
                     "client": {
+                        "id": "automata-backend-01",
                         "mode": "controller",
-                        "version": "1.0.0",
-                        "key": token
-                    }
+                        "platform": "python",
+                        "minProtocol": 1,
+                        "maxProtocol": 1
+                    },
+                    "token": token
                 }
             }
             
