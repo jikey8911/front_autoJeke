@@ -15,9 +15,8 @@ function App() {
     // Consultar estado de los agentes al backend
     const fetchAgents = async () => {
       try {
-        // Usamos la ruta relativa /api para que el proxy de Vite enrute internamente
-        // al contenedor automata_backend:5000, evitando problemas de CORS e IPs públicas.
-        const response = await fetch('/api/agents');
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
+        const response = await fetch(`${apiUrl}/agents`);
         const data = await response.json();
         setAgents(data);
       } catch (error) {
