@@ -15,7 +15,8 @@ function App() {
   const [backendStatus, setBackendStatus] = useState("CHECKING...");
 
   const testBackendConnection = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://automata_backend:5000';
+    // Usar la IP pública para que el navegador del usuario final pueda resolverla
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
     try {
       const response = await fetch(`${apiUrl}/test_ws`);
       if (response.ok) {
@@ -31,7 +32,8 @@ function App() {
 
   const fetchData = async () => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://automata_backend:5000';
+    // Usar la IP pública para que el navegador del usuario final pueda resolverla
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://163.192.114.190:5000';
     const endpoints = ['agents', 'opportunities', 'running_tasks', 'balance', 'status', 'mitosis', 'kill'];
     
     const results = {};

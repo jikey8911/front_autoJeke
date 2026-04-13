@@ -23,7 +23,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://automata_backend:5000
+      - VITE_API_URL=http://163.192.114.190:5000
     networks:
       - automata_net
 
