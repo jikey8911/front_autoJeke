@@ -80,7 +80,10 @@ async def get_agents():
     """
     Obtiene la lista de agentes y sus características.
     """
-    return await query_openclaw_ws(data_needed="agents", format_expected="json")
+    print("[Backend] Recibida petición en /agents. Iniciando consulta a OpenClaw WS...")
+    response = await query_openclaw_ws(data_needed="agents", format_expected="json")
+    print(f"[Backend] Respuesta WS obtenida para /agents: {response}")
+    return response
 
 @app.get("/opportunities")
 async def get_opportunities():

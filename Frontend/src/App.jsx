@@ -30,21 +30,25 @@ function App() {
     }
   };
 
-  const fetchData = async () => {
+    const fetchData = async () => {
     setLoading(true);
-    // Vite Proxy: Usamos ruta relativa /api
+    // Vite Proxy: Usamos ruta relativa /api (que proxy envía a http://automata_backend:5000)
     const apiUrl = '/api';
     
-    // Solo pedimos 'agents' por ahora para no saturar al sistema
+    // Solo pedimos 'agents' por ahora
     const endpoints = ['agents'];
     
     const results = { ...data };
     for (const endpoint of endpoints) {
       try {
+        console.log(`[Frontend] Pidiendo datos a: ${apiUrl}/${endpoint}`);
         const response = await fetch(`${apiUrl}/${endpoint}`);
-        results[endpoint] = await response.json();
+        const jsonResponse = await response.json();
+        console.log(`[Frontend] Respuesta de ${endpoint}:`, jsonResponse);
+        results[endpoint] = jsonResponse;
       } catch (error) {
-        results[endpoint] = { error: "Connection Failed" };
+        console.error(`[Frontend] Error en ${endpoint}:`, error);
+        results[endpoint] = { error: "Connection Failed", details: error.message };
       }
     }
     setData(results);
