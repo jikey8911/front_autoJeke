@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build: 
+    build:
       context: ./Backend
       dockerfile: Dockerfile
     container_name: automata_backend
@@ -14,12 +14,12 @@ services:
       - automata_net
 
   frontend:
-    build: 
+    build:
       context: ./Frontend
       dockerfile: Dockerfile
     container_name: automata_frontend
     ports:
-      - "3000:5173" # Expone el puerto 3000 en el host, enrutado al 5173 de Vite
+      - "3000:3000" # Expone el puerto 3000 en el host, enrutado al 5173 de Vite
     depends_on:
       - backend
     environment:
