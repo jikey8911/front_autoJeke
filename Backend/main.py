@@ -36,13 +36,17 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
         "format_expected": format_expected
     }
     
+    # Token de OpenClaw. Obligatorio enviarlo en las cabeceras HTTP como Authorization o en la query params.
+    token = "6c7e7cefc776dd2bad574d8314ca6549b5bfa2b8b2bff403"
+    url_with_token = f"{OPENCLAW_WS_URL}?token={token}"
+    
     try:
         # Timeout extendido a 60s: El agente IA puede tomar tiempo en leer archivos y formular la respuesta JSON
         headers = {
             "User-Agent": "Automata-Backend/1.0",
             "Origin": "http://127.0.0.1:8080" # Uno de los allowedOrigins en openclaw.json
         }
-        async with websockets.connect(OPENCLAW_WS_URL, extra_headers=headers) as websocket:
+        async with websockets.connect(url_with_token, extra_headers=headers) as websocket:
             # 1. Esperar y descartar el mensaje de bienvenida/challenge de OpenClaw
             welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
             print(f"[Backend] Recibido saludo de OpenClaw: {welcome_msg}")
@@ -72,10 +76,17 @@ async def test_ws_connection():
     Endpoint de prueba para confirmar si el backend puede alcanzar y conectar
     con el WebSocket de OpenClaw. No pide datos, solo prueba el handshake.
     """
-    print(f"[Backend] Recibida petición en /test_ws. Probando conexión WS hacia {OPENCLAW_WS_URL}...")
+    token = "6c7e7cefc776dd2bad574d8314ca6549b5bfa2b8b2bff403"
+    url_with_token = f"{OPENCLAW_WS_URL}?token={token}"
+    
+    print(f"[Backend] Recibida petición en /test_ws. Probando conexión WS hacia {url_with_token}...")
     try:
+        headers = {
+            "User-Agent": "Automata-Backend/1.0",
+            "Origin": "http://127.0.0.1:8080" 
+        }
         # Solo intenta abrir y cerrar la conexión
-        async with websockets.connect(OPENCLAW_WS_URL, close_timeout=2) as websocket:
+        async with websockets.connect(url_with_token, extra_headers=headers, close_timeout=2) as websocket:
             print("[Backend] Conexión WS /test_ws EXITOSA.")
             return {
                 "status": "success",
