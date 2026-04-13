@@ -12,6 +12,22 @@ function App() {
     kill: null
   });
   const [loading, setLoading] = useState(true);
+  const [backendStatus, setBackendStatus] = useState("CHECKING...");
+
+  const testBackendConnection = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://automata_backend:5000';
+    try {
+      const response = await fetch(`${apiUrl}/test_ws`);
+      if (response.ok) {
+        setBackendStatus("CONNECTED");
+      } else {
+        setBackendStatus("FAILED (HTTP Error)");
+      }
+    } catch (error) {
+      console.error("Backend connection error:", error);
+      setBackendStatus(`FAILED: ${error.message}`);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -34,6 +50,7 @@ function App() {
   useEffect(() => {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
+    testBackendConnection();
     fetchData();
   }, []);
 
@@ -60,10 +77,13 @@ function App() {
           Sistema Operativo Autónomo de Negocios
         </p>
 
-        <div className="flex justify-center pb-4">
-          <NeoButton variant="cyan" onClick={fetchData}>
+        <div className="flex flex-col items-center justify-center space-y-4 pb-4">
+          <NeoButton variant="cyan" onClick={() => { testBackendConnection(); fetchData(); }}>
             {loading ? "SYNCING..." : "FORCE SYNC DATA"}
           </NeoButton>
+          <div className="text-xs font-mono text-neo-cyan/60">
+            BACKEND API STATUS: <span className={backendStatus === "CONNECTED" ? "text-neo-cyan" : "text-neo-magenta"}>{backendStatus}</span>
+          </div>
         </div>
 
         {/* Top Status Cards */}
