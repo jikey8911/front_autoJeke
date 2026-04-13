@@ -55,8 +55,8 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                     "minProtocol": 3,
                     "maxProtocol": 3,
                     "client": {
-                        "id": "automata-backend",
-                        "version": "1.0.0",
+                        "id": "cli", # OpenClaw solo acepta clientes oficiales ("cli", "ios", etc.)
+                        "version": "1.2.3",
                         "platform": "linux",
                         "mode": "operator"
                     },
@@ -67,7 +67,7 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                     "permissions": {},
                     "auth": { "token": token },
                     "locale": "en-US",
-                    "userAgent": "automata-backend/1.0",
+                    "userAgent": "openclaw-cli/1.2.3", # Mimics the official CLI
                     "device": {
                         "id": "automata_backend_fingerprint",
                         "publicKey": "dummy_pk",
