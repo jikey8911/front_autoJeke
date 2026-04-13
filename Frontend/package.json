@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jikey8911/jeikei-ui": "file: home/ubuntu/front_autoJeke/Frontend/jikey8911-jeikei-ui-1.0.0.tgz",
+    "@jikey8911/jeikei-ui": "git+https://github.com/jikey8911/style_jeikei_desing.git",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
