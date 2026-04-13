@@ -19,7 +19,7 @@ export default defineConfig({
   },
   server: {
     host: true, // Importante para Docker
-    port: 5173, // Vite usa 5173 por defecto, mapeado a 3000 en docker-compose
+    port: 3000, // Vite ahora corre nativamente en el puerto 3000
   },
   build: {
     cssMinify: false, // lightningcss no soporta @theme (Tailwind v4) de jeikei-ui
