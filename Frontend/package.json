@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tu-usuario/jeikei-ui": "github:jikey8911/style_jeikei_desing",
+    "@jikey8911/jeikei-ui": "1.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

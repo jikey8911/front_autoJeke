@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import '@tu-usuario/jeikei-ui/style.css'
+import '/node_modules/@jikey8911/jeikei-ui/dist/jeikei-ui.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
