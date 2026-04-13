@@ -35,33 +35,36 @@ async def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict =
             else:
                 response = await client.post(url, headers=headers, json=payload, timeout=60.0)
 
+            # Si el Gateway responde con un error HTTP, lanzamos excepción para capturarla
             response.raise_for_status()
+            
             data = response.json()
             print(f"[GATEWAY-RESPONSE] {endpoint}: {json.dumps(data, indent=2)}")
             return data
         except Exception as e:
             print(f"[ERROR-GATEWAY] Fallo en {endpoint}: {str(e)}")
-            return {
-                "error": "GATEWAY_UNREACHABLE",
+            # En lugar de solo imprimir, lanzamos un error 502/503 real para que el Front sepa qué pasó
+            raise HTTPException(status_code=502, detail={
+                "error": "GATEWAY_ERROR",
                 "details": str(e),
                 "endpoint": endpoint
-            }
+            })
 
 @app.get("/test_ws") # Mantenemos este nombre para compatibilidad con el frontend actual
 @app.get("/health")
 async def health_check():
     """Verifica la conectividad básica con el Gateway"""
-    return query_openclaw_api("models")
+    return await query_openclaw_api("models")
 
 @app.get("/agents")
 async def get_agents():
     """Lista de agentes activos en el sistema"""
-    return query_openclaw_api("agents")
+    return await query_openclaw_api("agents")
 
 @app.get("/status")
 async def get_status():
     """Estado de salud del Gateway y sus canales"""
-    return query_openclaw_api("status")
+    return await query_openclaw_api("status")
 
 @app.get("/opportunities")
 async def get_opportunities():
@@ -77,17 +80,17 @@ async def get_opportunities():
         ],
         "response_format": { "type": "json_object" }
     }
-    return query_openclaw_api("chat/completions", "POST", payload)
+    return await query_openclaw_api("chat/completions", "POST", payload)
 
 @app.get("/running_tasks")
 async def get_running_tasks():
     """Sesiones de agentes en ejecución"""
-    return query_openclaw_api("sessions")
+    return await query_openclaw_api("sessions")
 
 @app.get("/balance")
 async def get_balance():
     """Uso de tokens y balance del sistema"""
-    return query_openclaw_api("usage/status")
+    return await query_openclaw_api("usage/status")
 
 if __name__ == "__main__":
     import uvicorn
