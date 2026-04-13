@@ -59,15 +59,18 @@ async def test_ws_connection():
     Endpoint de prueba para confirmar si el backend puede alcanzar y conectar
     con el WebSocket de OpenClaw. No pide datos, solo prueba el handshake.
     """
+    print(f"[Backend] Recibida petición en /test_ws. Probando conexión WS hacia {OPENCLAW_WS_URL}...")
     try:
         # Solo intenta abrir y cerrar la conexión
         async with websockets.connect(OPENCLAW_WS_URL, close_timeout=2) as websocket:
+            print("[Backend] Conexión WS /test_ws EXITOSA.")
             return {
                 "status": "success",
                 "message": "Conexión WebSocket a OpenClaw exitosa.",
                 "url_tested": OPENCLAW_WS_URL
             }
     except Exception as e:
+        print(f"[Backend] Conexión WS /test_ws FALLIDA. Error: {e}")
         return {
             "status": "error",
             "message": "Fallo al conectar con el WebSocket de OpenClaw.",

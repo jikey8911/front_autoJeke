@@ -18,14 +18,18 @@ function App() {
     // Vite Proxy: Usamos ruta relativa /api para que Vite la redirija a automata_backend:5000
     const apiUrl = '/api';
     try {
+      console.log(`[Frontend] Pidiendo test_ws a: ${apiUrl}/test_ws`);
       const response = await fetch(`${apiUrl}/test_ws`);
-      if (response.ok) {
+      const jsonResponse = await response.json();
+      console.log(`[Frontend] Respuesta de test_ws:`, jsonResponse);
+      
+      if (response.ok && jsonResponse.status === "success") {
         setBackendStatus("CONNECTED");
       } else {
-        setBackendStatus("FAILED (HTTP Error)");
+        setBackendStatus(`FAILED: ${jsonResponse.message || 'HTTP Error'}`);
       }
     } catch (error) {
-      console.error("Backend connection error:", error);
+      console.error("[Frontend] Error en testBackendConnection:", error);
       setBackendStatus(`FAILED: ${error.message}`);
     }
   };
