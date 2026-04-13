@@ -1,13 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import requests
+import httpx
 import os
 import json
 
 app = FastAPI(title="Automata Platform Backend")
 
-# --- CONFIGURACIÓN DE ENTORNO (Control de Misión) ---
-# Extraemos la configuración de Docker o usamos fallbacks técnicos
+# --- CONFIGURACIÓN DE ENTORNO ---
 GATEWAY_URL = os.getenv("OPENCLAW_GATEWAY_URL", "http://openclaw_instance:10424")
 TOKEN = os.getenv("OPENCLAW_TOKEN", "8941487567606a620353868ebbcd32f73ba9b26de1551c09")
 OPENCLAW_API_BASE = f"{GATEWAY_URL}/v1"
@@ -20,32 +19,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict = None):
-    """Orquestador de peticiones a OpenClaw v1 API"""
+async def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict = None):
+    """Orquestador ASÍNCRONO de peticiones a OpenClaw v1 API"""
     url = f"{OPENCLAW_API_BASE}/{endpoint}"
     headers = {
         "Authorization": f"Bearer {TOKEN}",
         "Content-Type": "application/json"
     }
 
-    try:
-        if method == "GET":
-            response = requests.get(url, headers=headers, timeout=10)
-        else:
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
+    async with httpx.AsyncClient() as client:
+        try:
+            print(f"[ASYNCHRONOUS-REQ] {method} a {url}")
+            if method == "GET":
+                response = await client.get(url, headers=headers, timeout=30.0)
+            else:
+                response = await client.post(url, headers=headers, json=payload, timeout=60.0)
 
-        response.raise_for_status()
-        data = response.json()
-        print(f"[GATEWAY-RESPONSE] {endpoint}: {json.dumps(data, indent=2)}")
-        return data
-    except requests.exceptions.RequestException as e:
-        print(f"[ERROR-GATEWAY] Fallo en {endpoint}: {str(e)}")
-        # Estructura de error consistente para el Frontend
-        return {
-            "error": "GATEWAY_UNREACHABLE",
-            "details": str(e),
-            "endpoint": endpoint
-        }
+            response.raise_for_status()
+            data = response.json()
+            print(f"[GATEWAY-RESPONSE] {endpoint}: {json.dumps(data, indent=2)}")
+            return data
+        except Exception as e:
+            print(f"[ERROR-GATEWAY] Fallo en {endpoint}: {str(e)}")
+            return {
+                "error": "GATEWAY_UNREACHABLE",
+                "details": str(e),
+                "endpoint": endpoint
+            }
 
 @app.get("/test_ws") # Mantenemos este nombre para compatibilidad con el frontend actual
 @app.get("/health")
