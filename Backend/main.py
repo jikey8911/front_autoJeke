@@ -70,8 +70,8 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                     "userAgent": "openclaw-cli/1.2.3", # Mimics the official CLI
                     "device": {
                         "id": "automata_backend_fingerprint",
-                        "publicKey": "dummy_pk",
-                        "signature": "dummy_sig",
+                        "publicKey": "base64_encoded_dummy_key",
+                        "signature": "base64_encoded_dummy_sig",
                         "signedAt": 1737264000000,
                         "nonce": nonce
                     }
