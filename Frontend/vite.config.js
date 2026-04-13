@@ -18,10 +18,11 @@ export default defineConfig({
     exclude: ['@jikey8911/jeikei-ui'],
   },
   server: {
-    port: 3000,
+    host: true, // Importante para Docker
+    port: 5173, // Vite usa 5173 por defecto, mapeado a 3000 en docker-compose
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://automata_backend:5000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
