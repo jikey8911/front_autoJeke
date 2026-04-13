@@ -47,8 +47,15 @@ function App() {
       try {
         console.log(`[Frontend] Pidiendo datos a: ${apiUrl}/${endpoint}`);
         const response = await fetch(`${apiUrl}/${endpoint}`);
-        const jsonResponse = await response.json();
-        console.log(`[Frontend] Respuesta de ${endpoint}:`, jsonResponse);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+        
+        const textResponse = await response.text();
+        console.log(`[Frontend] Respuesta cruda de ${endpoint}:`, textResponse);
+        
+        const jsonResponse = JSON.parse(textResponse);
         results[endpoint] = jsonResponse;
       } catch (error) {
         console.error(`[Frontend] Error en ${endpoint}:`, error);
