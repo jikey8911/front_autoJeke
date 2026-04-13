@@ -34,9 +34,11 @@ function App() {
     setLoading(true);
     // Vite Proxy: Usamos ruta relativa /api
     const apiUrl = '/api';
-    const endpoints = ['agents', 'opportunities', 'running_tasks', 'balance', 'status', 'mitosis', 'kill'];
     
-    const results = {};
+    // Solo pedimos 'agents' por ahora para no saturar al sistema
+    const endpoints = ['agents'];
+    
+    const results = { ...data };
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(`${apiUrl}/${endpoint}`);
@@ -97,12 +99,9 @@ function App() {
 
         {/* Detailed Data Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 w-full text-left">
-          {renderRawData("Global Status", data.status)}
           {renderRawData("Active Agents", data.agents)}
-          {renderRawData("Opportunities", data.opportunities)}
-          {renderRawData("Running Tasks", data.running_tasks)}
-          {renderRawData("Broker Balance", data.balance)}
-          {renderRawData("Mitosis Events", data.mitosis)}
+          {renderRawData("Global Status", data.status || { info: "Pendiente..." })}
+          {renderRawData("Opportunities", data.opportunities || { info: "Pendiente..." })}
         </div>
       </div>
     </div>
