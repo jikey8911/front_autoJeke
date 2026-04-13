@@ -57,8 +57,8 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                     "client": {
                         "id": "cli",
                         "version": "1.2.3",
-                        "platform": "linux",
-                        "mode": "daemon" # Si no era operator ni standalone, intentamos daemon
+                        "platform": "macos",
+                        "mode": "operator"
                     },
                     "role": "operator",
                     "scopes": ["operator.read", "operator.admin"],
