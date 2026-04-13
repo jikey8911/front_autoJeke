@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jikey8911/jeikei-ui": "file:./jikey8911-jeikei-ui-1.0.0.tgz",
+    "@jikey8911/jeikei-ui": "file:Frontend/jikey8911-jeikei-ui-1.0.0.tgz",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
