@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
+import websockets
+import asyncio
 import json
 import os
 
@@ -16,81 +17,172 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# URL del Plugin API HTTP de OpenClaw Gateway
-OPENCLAW_API_URL = os.getenv("OPENCLAW_API_URL", "http://openclaw_instance:9001/api/v1/send")
+# URL del WebSockets de OpenClaw Gateway
+OPENCLAW_WS_URL = os.getenv("OPENCLAW_WS_URL", "ws://openclaw_instance:10424")
 
 class OpenClawRequest(BaseModel):
-    content: str
-    userId: str
+    data_needed: str
+    format_expected: str
 
-async def send_to_openclaw(message: str, user_id: str = "automata_dashboard"):
+async def query_openclaw_ws(data_needed: str, format_expected: str):
     """
-    Envía un mensaje al agente de OpenClaw usando la API REST (Unidireccional).
+    Función helper para abrir conexión WebSocket, enviar la petición a OpenClaw,
+    esperar la respuesta, cerrarla y retornarla.
     """
     token = "6c7e7cefc776dd2bad574d8314ca6549b5bfa2b8b2bff403"
     
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "content": message,
-        "userId": user_id
-    }
-    
-    print(f"[Backend] Enviando mensaje a OpenClaw API: {message}")
     try:
-        # Usamos requests para hacer un HTTP POST simple
-        response = requests.post(OPENCLAW_API_URL, json=payload, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        data = response.json()
-        print(f"[Backend] Respuesta API OpenClaw: {data}")
-        return data
-        
-    except requests.exceptions.RequestException as e:
-        print(f"[Backend] Error en petición API: {e}")
-        return {"error": "Fallo al comunicar con la API de OpenClaw", "details": str(e)}
+        headers = {
+            "User-Agent": "Automata-Backend/1.0",
+            "Origin": "http://127.0.0.1:8080",
+            "Authorization": f"Bearer {token}"
+        }
+        async with websockets.connect(OPENCLAW_WS_URL, extra_headers=headers) as websocket:
+            # 1. Esperar el mensaje de bienvenida/challenge de OpenClaw
+            welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Recibido saludo de OpenClaw: {welcome_msg}")
+            
+            welcome_json = json.loads(welcome_msg)
+            nonce = welcome_json.get("payload", {}).get("nonce", "")
+            
+            # 2. Construir el Handshake v3 de OpenClaw oficial
+            connect_payload = {
+                "type": "req",
+                "id": "1",
+                "method": "connect",
+                "params": {
+                    "minProtocol": 3,
+                    "maxProtocol": 3,
+                    "client": {
+                        "id": "cli",
+                        "version": "1.2.3",
+                        "platform": "macos",
+                        "mode": "operator"
+                    },
+                    "role": "operator",
+                    "scopes": ["operator.read", "operator.admin"],
+                    "caps": [],
+                    "commands": [],
+                    "permissions": {},
+                    "auth": { "token": token },
+                    "locale": "en-US",
+                    "userAgent": "openclaw-cli/1.2.3",
+                    "device": {
+                        "id": "automata_backend_fingerprint",
+                        "publicKey": "dummy_pk",
+                        "signature": "dummy_sig",
+                        "signedAt": int(welcome_json.get("payload", {}).get("ts", 1737264000000)),
+                        "nonce": nonce
+                    }
+                }
+            }
+            
+            await websocket.send(json.dumps(connect_payload))
+            print(f"[Backend] Handshake enviado con nonce: {nonce}")
+
+            # 3. Esperar confirmación del Handshake
+            auth_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Respuesta Handshake: {auth_response}")
+            auth_json = json.loads(auth_response)
+            
+            if not auth_json.get("ok"):
+                return {"error": "Handshake rechazado por OpenClaw", "details": auth_json}
+
+            # 4. Ahora sí, enviar la petición de datos real usando métodos RPC de OpenClaw
+            openclaw_method = "agents.list"
+            if data_needed == "status": openclaw_method = "status"
+            if data_needed == "balance": openclaw_method = "usage.cost"
+            
+            request_payload = {
+                "type": "req",
+                "id": "2",
+                "method": openclaw_method,
+                "params": {}
+            }
+            await websocket.send(json.dumps(request_payload))
+            print(f"[Backend] Petición de datos enviada: {request_payload}")
+
+            # 5. Esperar la respuesta real a nuestra petición
+            response_str = await asyncio.wait_for(websocket.recv(), timeout=60.0)
+            print(f"[Backend] Respuesta recibida: {response_str}")
+            
+            try:
+                return json.loads(response_str)
+            except json.JSONDecodeError:
+                return {"raw_response": response_str}
+                
+    except asyncio.TimeoutError:
+         return {"error": f"Timeout: El agente en OpenClaw no respondió a la solicitud de '{data_needed}' en 60 segundos."}
+    except Exception as e:
+        print(f"Error WS: {e}")
+        return {"error": f"Fallo de comunicación WS: {e}"}
 
 @app.get("/test_ws")
 async def test_ws_connection():
     """
-    Test adaptado a la API HTTP.
+    Endpoint de prueba para confirmar si el backend puede alcanzar y conectar
+    con el WebSocket de OpenClaw. No pide datos, solo prueba el handshake.
     """
-    return await send_to_openclaw("PING de prueba desde el Dashboard")
+    token = "6c7e7cefc776dd2bad574d8314ca6549b5bfa2b8b2bff403"
+    
+    print(f"[Backend] Recibida petición en /test_ws. Probando conexión WS hacia {OPENCLAW_WS_URL}...")
+    try:
+        headers = {
+            "User-Agent": "Automata-Backend/1.0",
+            "Origin": "http://127.0.0.1:8080",
+            "Authorization": f"Bearer {token}"
+        }
+        # Solo intenta abrir y cerrar la conexión
+        async with websockets.connect(OPENCLAW_WS_URL, extra_headers=headers, close_timeout=2) as websocket:
+            welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Conexión WS /test_ws EXITOSA. Challenge recibido: {welcome_msg}")
+            return {
+                "status": "success",
+                "message": "Conexión WebSocket a OpenClaw exitosa.",
+                "url_tested": OPENCLAW_WS_URL
+            }
+    except Exception as e:
+        print(f"[Backend] Conexión WS /test_ws FALLIDA. Error: {e}")
+        return {
+            "status": "error",
+            "message": "Fallo al conectar con el WebSocket de OpenClaw.",
+            "url_tested": OPENCLAW_WS_URL,
+            "details": str(e)
+        }
 
 @app.get("/agents")
 async def get_agents():
     """
-    Solicita la lista de agentes por la API.
-    Nota: El modo HTTP devuelve {"ok": true} y el agente responderá por Telegram.
+    Obtiene la lista de agentes y sus características.
     """
-    return await send_to_openclaw("Por favor, dame la lista de agentes activos y su estado.")
+    print("[Backend] Recibida petición en /agents. Iniciando consulta a OpenClaw WS...")
+    response = await query_openclaw_ws(data_needed="agents", format_expected="json")
+    print(f"[Backend] Respuesta WS obtenida para /agents: {response}")
+    return response
 
 @app.get("/opportunities")
 async def get_opportunities():
-    return await send_to_openclaw("Por favor, dame la lista de oportunidades.")
+    return await query_openclaw_ws(data_needed="opportunities", format_expected="json")
 
 @app.get("/running_tasks")
 async def get_running_tasks():
-    return await send_to_openclaw("Por favor, dame la lista de tareas en ejecucion.")
+    return await query_openclaw_ws(data_needed="running_tasks", format_expected="json")
 
 @app.get("/balance")
 async def get_balance():
-    return await send_to_openclaw("Por favor, dame el balance global.")
+    return await query_openclaw_ws(data_needed="balance", format_expected="json")
 
 @app.get("/status")
 async def get_status():
-    return await send_to_openclaw("Por favor, dame el estado del sistema.")
+    return await query_openclaw_ws(data_needed="status", format_expected="json")
 
 @app.get("/mitosis")
 async def get_mitosis():
-    return await send_to_openclaw("Informacion de mitosis.")
+    return await query_openclaw_ws(data_needed="mitosis", format_expected="json")
 
 @app.get("/kill")
 async def get_kill():
-    return await send_to_openclaw("Informacion de grupos eliminados.")
+    return await query_openclaw_ws(data_needed="kill", format_expected="json")
 
 if __name__ == '__main__':
     import uvicorn

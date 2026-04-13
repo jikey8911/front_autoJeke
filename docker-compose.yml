@@ -10,7 +10,8 @@ services:
       - "5000:5000"
     environment:
       # Usamos el nombre del contenedor de openclaw tal cual
-      - OPENCLAW_API_URL=http://openclaw_instance:9001/api/v1/send
+      # Usamos el nombre del contenedor de openclaw tal cual
+      - OPENCLAW_WS_URL=ws://openclaw_instance:10424
     networks:
       - automataopenclaw_automata_net
 
