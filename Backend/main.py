@@ -30,33 +30,80 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
     Función helper para abrir conexión WebSocket, enviar la petición a OpenClaw,
     esperar la respuesta, cerrarla y retornarla.
     """
-    payload = {
-        "action": "request_info", # o la acción que acepte el WS de OpenClaw
-        "data_needed": data_needed,
-        "format_expected": format_expected
-    }
-    
-    # Token de OpenClaw. Obligatorio enviarlo en las cabeceras HTTP como Authorization o en la query params.
     token = "6c7e7cefc776dd2bad574d8314ca6549b5bfa2b8b2bff403"
-    url_with_token = f"{OPENCLAW_WS_URL}?token={token}"
     
     try:
-        # Timeout extendido a 60s: El agente IA puede tomar tiempo en leer archivos y formular la respuesta JSON
         headers = {
             "User-Agent": "Automata-Backend/1.0",
             "Origin": "http://127.0.0.1:8080", # Uno de los allowedOrigins en openclaw.json
             "Authorization": f"Bearer {token}"
         }
         async with websockets.connect(OPENCLAW_WS_URL, extra_headers=headers) as websocket:
-            # 1. Esperar y descartar el mensaje de bienvenida/challenge de OpenClaw
+            # 1. Esperar el mensaje de bienvenida/challenge de OpenClaw
             welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
             print(f"[Backend] Recibido saludo de OpenClaw: {welcome_msg}")
+            
+            welcome_json = json.loads(welcome_msg)
+            nonce = welcome_json.get("payload", {}).get("nonce", "")
+            
+            # 2. Construir el Handshake v3 de OpenClaw
+            connect_payload = {
+                "type": "req",
+                "id": "1",
+                "method": "connect",
+                "params": {
+                    "minProtocol": 3,
+                    "maxProtocol": 3,
+                    "client": {
+                        "id": "automata-backend",
+                        "version": "1.0.0",
+                        "platform": "linux",
+                        "mode": "operator"
+                    },
+                    "role": "operator",
+                    "scopes": ["operator.read", "operator.admin"],
+                    "caps": [],
+                    "commands": [],
+                    "permissions": {},
+                    "auth": { "token": token },
+                    "locale": "en-US",
+                    "userAgent": "automata-backend/1.0",
+                    "device": {
+                        "id": "automata_backend_fingerprint",
+                        "publicKey": "dummy_pk",
+                        "signature": "dummy_sig",
+                        "signedAt": 1737264000000,
+                        "nonce": nonce
+                    }
+                }
+            }
+            
+            await websocket.send(json.dumps(connect_payload))
+            print(f"[Backend] Handshake enviado con nonce: {nonce}")
 
-            # 2. Enviar nuestra petición
-            await websocket.send(json.dumps(payload))
-            print(f"[Backend] Petición enviada: {payload}")
+            # 3. Esperar confirmación del Handshake
+            auth_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Respuesta Handshake: {auth_response}")
+            auth_json = json.loads(auth_response)
+            
+            if not auth_json.get("ok"):
+                return {"error": "Handshake rechazado por OpenClaw", "details": auth_json}
 
-            # 3. Esperar la respuesta real a nuestra petición
+            # 4. Ahora sí, enviar la petición de datos real usando métodos RPC de OpenClaw
+            openclaw_method = "agents.list"
+            if data_needed == "status": openclaw_method = "status"
+            if data_needed == "balance": openclaw_method = "usage.cost"
+            
+            request_payload = {
+                "type": "req",
+                "id": "2",
+                "method": openclaw_method,
+                "params": {}
+            }
+            await websocket.send(json.dumps(request_payload))
+            print(f"[Backend] Petición de datos enviada: {request_payload}")
+
+            # 5. Esperar la respuesta real a nuestra petición
             response_str = await asyncio.wait_for(websocket.recv(), timeout=60.0)
             print(f"[Backend] Respuesta recibida: {response_str}")
             
@@ -82,13 +129,10 @@ async def test_ws_connection():
     
     print(f"[Backend] Recibida petición en /test_ws. Probando conexión WS hacia {OPENCLAW_WS_URL}...")
     try:
-        headers = {
-            "User-Agent": "Automata-Backend/1.0",
-            "Origin": "http://127.0.0.1:8080",
-            "Authorization": f"Bearer {token}"
-        }
         # Solo intenta abrir y cerrar la conexión
-        async with websockets.connect(OPENCLAW_WS_URL, extra_headers=headers, close_timeout=2) as websocket:
+        async with websockets.connect(OPENCLAW_WS_URL, close_timeout=2) as websocket:
+            welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            print(f"[Backend] Conexión WS /test_ws EXITOSA. Challenge recibido: {welcome_msg}")
             print("[Backend] Conexión WS /test_ws EXITOSA.")
             return {
                 "status": "success",
