@@ -58,7 +58,7 @@ async def query_openclaw_ws(data_needed: str, format_expected: str):
                         "id": "cli", # OpenClaw solo acepta clientes oficiales ("cli", "ios", etc.)
                         "version": "1.2.3",
                         "platform": "linux",
-                        "mode": "operator"
+                        "mode": "standalone" # El CLI suele correr en modo standalone o daemon
                     },
                     "role": "operator",
                     "scopes": ["operator.read", "operator.admin"],
