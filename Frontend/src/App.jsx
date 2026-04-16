@@ -18,7 +18,7 @@ function App() {
     setLoading(true);
     setBackendStatus("SYNCING CON API/ALL...");
     try {
-      // ÚNICA PETICIÓN PERMITIDA
+      // ÚNICA PETICIÓN: Eliminamos todas las peticiones a /status, /agents, /test_ws, etc.
       const response = await fetch('/api/all');
       if (response.ok) {
         const jsonResponse = await response.json();
@@ -37,11 +37,9 @@ function App() {
   useEffect(() => {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
-    
-    // Alarma para la consola (si ves otras peticiones, tu navegador no ha cargado esto)
-    console.log("[VERSION NUEVA] App cargada sin phantom requests. Se hará un fetch a /api/all");
-    
-    fetchDashboardData();
+
+    // Solo llamamos a la función centralizada una vez al cargar
+    fetchAllData();
   }, []);
 
   const renderList = (title, items) => (
@@ -84,6 +82,7 @@ function App() {
           </div>
         </div>
 
+        {/* HUD de Datos Consolidados */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-left">
           <NeoCard title="ESTADO SISTEMA" value={loading ? "..." : data.estado_sistema} status="KERNEL" variant="cyan" />
           <NeoCard title="BALANCE GLOBAL" value={loading ? "..." : `$${data.balance.global}`} status="USDT" variant="amber" />
@@ -93,25 +92,25 @@ function App() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 w-full text-left">
           <div className="p-4 border border-neo-cyan/30 rounded bg-neo-bg/80 backdrop-blur-sm flex flex-col">
-             <h3 className="text-neo-cyan font-bold tracking-widest mb-4 border-b border-neo-cyan/30 pb-2 uppercase text-xs">
-                Resumen UAEs
-             </h3>
-             <div className="flex justify-between items-center py-1">
-                <span className="text-neo-cyan/80">Activas:</span>
-                <span className="font-bold text-neo-cyan">{data.uaes.activas}</span>
-             </div>
-             <div className="flex justify-between items-center py-1">
-                <span className="text-neo-cyan/80">Inactivas:</span>
-                <span className="font-bold text-neo-amber">{data.uaes.inactivas}</span>
-             </div>
-             <div className="flex justify-between items-center py-1">
-                <span className="text-neo-cyan/80">Duplicadas:</span>
-                <span className="font-bold text-neo-cyan">{data.uaes.duplicadas}</span>
-             </div>
-             <div className="flex justify-between items-center py-1">
-                <span className="text-neo-cyan/80">Muertas:</span>
-                <span className="font-bold text-neo-magenta">{data.uaes.muertas}</span>
-             </div>
+            <h3 className="text-neo-cyan font-bold tracking-widest mb-4 border-b border-neo-cyan/30 pb-2 uppercase text-xs">
+              Resumen UAEs
+            </h3>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-neo-cyan/80">Activas:</span>
+              <span className="font-bold text-neo-cyan">{data.uaes.activas}</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-neo-cyan/80">Inactivas:</span>
+              <span className="font-bold text-neo-amber">{data.uaes.inactivas}</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-neo-cyan/80">Duplicadas:</span>
+              <span className="font-bold text-neo-cyan">{data.uaes.duplicadas}</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-neo-cyan/80">Muertas:</span>
+              <span className="font-bold text-neo-magenta">{data.uaes.muertas}</span>
+            </div>
           </div>
 
           {renderList("Agentes Globales (The Core)", data.agentes_globales)}
