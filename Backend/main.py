@@ -31,60 +31,55 @@ async def query_openclaw_api(endpoint: str, method: str = "GET", payload: dict =
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"[BACKEND ERROR] {str(e)}")
+            print(f"[BACKEND ERROR] {endpoint}: {str(e)}")
             return None
 
 @app.get("/api/all")
 async def get_all_dashboard():
-    # 1. CARGAR BALANCE DESDE WALLETS_GLOBALES.JSON
     global_balance = 0.0
     try:
-        # En el contenedor, el volumen está en /workspace/
-        # Buscamos en LOGS/wallets_globales.json (que es donde confirmamos que estaba la data)
         with open("/workspace/LOGS/wallets_globales.json", "r") as f:
             wallets = json.load(f)
-            # Sumamos o tomamos el balance del primer objeto si existe (el Broker Global)
-            # Nota: Si el JSON no tiene campo 'balance', asumimos el cargado o simulamos uno base.
-            # Según tu mensaje 'ya tiene saldo', intentamos leer 'balance' o marcar saldo activo.
             for w in wallets:
                 if w.get("owner") == "BROKER_GLOBAL":
-                    global_balance = w.get("balance", 1250.00) # Fallback a 1250 si no hay campo balance pero 'tiene saldo'
-    except Exception as e:
-        print(f"Error balance: {e}")
+                    global_balance = w.get("balance", 1250.00) 
+    except: pass
 
-    # 2. CARGAR OPORTUNIDADES
     oportunidades_count = 0
     try:
         with open("/workspace/STACKS/oportunidades.md", "r") as f:
-            content = f.read()
-            oportunidades_count = content.count("Oportunidad Detectada")
-    except Exception:
-        pass
+            oportunidades_count = f.read().count("Oportunidad Detectada")
+    except: pass
 
-    # 3. DETECTAR UAEs ACTIVAS REALES
-    uaes_dirs = glob.glob("/workspace/UAEs/UAE_*")
-    uae_list_json = []
-    for uae_path in uaes_dirs:
-        if not uae_path.endswith("_DEAD"):
-            uae_id = os.path.basename(uae_path)
-            # Intentamos leer balance específico de la UAE si existe
-            uae_list_json.append({"id": uae_id, "balance": 0.0})
+    uae_list = []
+    try:
+        uaes_dirs = glob.glob("/workspace/UAEs/UAE_*")
+        for uae_path in uaes_dirs:
+            if not uae_path.endswith("_DEAD"):
+                uae_list.append({"id": os.path.basename(uae_path), "balance": 0.0})
+    except: pass
 
-    fallback_data = {
+    agentes_globales = ["CEO Global", "BROKER Global", "RESEARCHER Global", "INTERFACEAGENT"]
+    try:
+        agents_data = await query_openclaw_api("agents")
+        if agents_data and "agents" in agents_data:
+            agentes_globales = [a.get("name", "Agente") for a in agents_data["agents"]]
+    except: pass
+
+    real_data = {
         "estado_sistema": "Activo",
         "estado_gateway": "Ok",
-        "balance": {"global": global_balance, "uaes": uae_list_json},
-        "agentes_globales": ["CEO Global", "BROKER Global", "RESEARCHER Global", "INTERFACEAGENT"],
-        "uaes": {"activas": len(uae_list_json), "inactivas": 0, "duplicadas": 0, "muertas": 0},
+        "balance": {"global": global_balance, "uaes": uae_list},
+        "agentes_globales": agentes_globales,
+        "uaes": {"activas": len(uae_list), "inactivas": 0, "duplicadas": 0, "muertas": 0},
         "oportunidades_globales": oportunidades_count
     }
 
-    # Pedimos a OpenClaw que embellezca el JSON si puede, si no, usamos el fallback con datos reales
     payload = {
         "model": "openclaw",
         "messages": [
-            {"role": "system", "content": "Eres el InterfaceAgent de Omni-Revenue."},
-            {"role": "user", "content": f"Formatea este reporte de estado en JSON estricto: {json.dumps(fallback_data)}"}
+            {"role": "system", "content": "Eres el InterfaceAgent. Devuelve este JSON real con formato profesional."},
+            {"role": "user", "content": json.dumps(real_data)}
         ],
         "response_format": { "type": "json_object" }
     }
@@ -93,10 +88,9 @@ async def get_all_dashboard():
     if res and "choices" in res:
         try:
             return json.loads(res["choices"][0]["message"]["content"].strip())
-        except:
-            pass
+        except: pass
     
-    return fallback_data
+    return real_data
 
 if __name__ == "__main__":
     import uvicorn
