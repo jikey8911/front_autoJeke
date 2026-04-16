@@ -22,6 +22,7 @@ function App() {
       const response = await fetch('/api/all');
       if (response.ok) {
         const jsonResponse = await response.json();
+        console.log("[Frontend] Respuesta de /api/all:", jsonResponse); // NUEVO: Log para depuración
         setData(jsonResponse);
         setBackendStatus("CONECTADO A BACKEND");
       } else {
