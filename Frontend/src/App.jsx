@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { initNeural, NeoCard, NeoButton } from '@jikey8911/jeikei-ui';
+import { platformAPI } from './middleware/api';
 
 function App() {
   const [data, setData] = useState({
@@ -17,18 +18,18 @@ function App() {
     setLoading(true);
     setBackendStatus("SYNCING...");
     try {
-      const response = await fetch('/api/all');
-      if (response.ok) {
-        const jsonResponse = await response.json();
-        console.log("[Frontend] Respuesta de /api/all:", jsonResponse);
+      const { data: jsonResponse, error } = await platformAPI.getAllDashboardData();
+      
+      if (!error) {
+        console.log("[Frontend] Respuesta desde Middleware (/api/all):", jsonResponse);
         setData(jsonResponse);
         setBackendStatus("CONNECTED");
       } else {
-        setBackendStatus(`FAILED: ${response.status}`);
+        setBackendStatus(error);
       }
-    } catch (error) {
-      console.error("[Frontend] Error al obtener /all:", error);
-      setBackendStatus(`FAILED: ${error.message}`);
+    } catch (err) {
+      console.error("[Frontend] Excepción en UI atrapada:", err);
+      setBackendStatus(`FAILED: ${err.message}`);
     }
     setLoading(false);
   };
