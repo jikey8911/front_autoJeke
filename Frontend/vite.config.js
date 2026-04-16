@@ -24,7 +24,6 @@ export default defineConfig({
       '/api': {
         target: 'http://automata_backend:5000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
