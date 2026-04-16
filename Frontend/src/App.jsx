@@ -11,25 +11,25 @@ function App() {
     oportunidades_globales: 0
   });
   const [loading, setLoading] = useState(true);
-  const [backendStatus, setBackendStatus] = useState("CHECKING...");
+  const [backendStatus, setBackendStatus] = useState("ESPERANDO CONEXIÓN...");
 
-  const fetchAllData = async () => {
+  // ELIMINADAS OFICIALMENTE TODAS LAS LLAMADAS A /test_ws, /agents y /status
+  const fetchDashboardData = async () => {
     setLoading(true);
-    setBackendStatus("SYNCING...");
+    setBackendStatus("SYNCING CON API/ALL...");
     try {
-      // USAMOS RUTA RELATIVA: Esto garantiza que el navegador pida a la misma IP/Puerto donde carga el Front.
-      // Vite Proxy se encargará de redirigir /api/all al contenedor de Backend puerto 5000.
+      // ÚNICA PETICIÓN PERMITIDA
       const response = await fetch('/api/all');
       if (response.ok) {
         const jsonResponse = await response.json();
         setData(jsonResponse);
-        setBackendStatus("CONNECTED");
+        setBackendStatus("CONECTADO A BACKEND");
       } else {
-        setBackendStatus(`FAILED: ${response.status}`);
+        setBackendStatus(`HTTP ERROR: ${response.status}`);
       }
     } catch (error) {
-      console.error("[Frontend] Error al obtener /all:", error);
-      setBackendStatus(`FAILED: ${error.message}`);
+      console.error("[Frontend] Error al conectar con Backend:", error);
+      setBackendStatus(`ERROR DE RED`);
     }
     setLoading(false);
   };
@@ -38,7 +38,10 @@ function App() {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
     
-    fetchAllData();
+    // Alarma para la consola (si ves otras peticiones, tu navegador no ha cargado esto)
+    console.log("[VERSION NUEVA] App cargada sin phantom requests. Se hará un fetch a /api/all");
+    
+    fetchDashboardData();
   }, []);
 
   const renderList = (title, items) => (
@@ -69,15 +72,15 @@ function App() {
           Omni-Revenue
         </h1>
         <p className="text-neo-cyan/70 tracking-widest uppercase text-sm font-bold">
-          Sistema Operativo Autónomo de Negocios
+          Sistema Operativo Autónomo de Negocios (v2.0 Clean)
         </p>
 
         <div className="flex flex-col items-center justify-center space-y-4 pb-4">
-          <NeoButton variant="cyan" onClick={fetchAllData}>
-            {loading ? "SYNCING..." : "FORCE SYNC DATA"}
+          <NeoButton variant="cyan" onClick={fetchDashboardData}>
+            {loading ? "ACTUALIZANDO..." : "FORZAR SINCRONIZACIÓN"}
           </NeoButton>
           <div className="text-xs font-mono text-neo-cyan/60 uppercase">
-            Backend API Link: <span className={backendStatus === "CONNECTED" ? "text-neo-cyan" : "text-neo-magenta"}>{backendStatus}</span>
+            Estado de Conexión: <span className={backendStatus === "CONECTADO A BACKEND" ? "text-neo-cyan" : "text-neo-magenta"}>{backendStatus}</span>
           </div>
         </div>
 

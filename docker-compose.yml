@@ -9,9 +9,11 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Inyectamos la URL y el Token para evitar hardcode en main.py
-      - OPENCLAW_GATEWAY_URL=http://openclaw_instance:10424
+      # Inyectamos la URL indicando al contenedor que apunte al Host de Windows ("127.0.0.1" del host)
+      - OPENCLAW_GATEWAY_URL=http://host.docker.internal:10424
       - OPENCLAW_TOKEN=8941487567606a620353868ebbcd32f73ba9b26de1551c09
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - automata_net
 
@@ -22,6 +24,9 @@ services:
     container_name: automata_frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     networks:
