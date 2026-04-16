@@ -17,8 +17,7 @@ function App() {
     setLoading(true);
     setBackendStatus("SYNCING...");
     try {
-      // USAMOS RUTA RELATIVA: Esto garantiza que el navegador pida a la misma IP/Puerto donde carga el Front.
-      // Vite Proxy se encargará de redirigir /api/all al contenedor de Backend puerto 5000.
+      // ÚNICA PETICIÓN: Eliminamos todas las peticiones a /status, /agents, /test_ws, etc.
       const response = await fetch('/api/all');
       if (response.ok) {
         const jsonResponse = await response.json();
@@ -38,6 +37,7 @@ function App() {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
     
+    // Solo llamamos a la función centralizada una vez al cargar
     fetchAllData();
   }, []);
 
@@ -81,6 +81,7 @@ function App() {
           </div>
         </div>
 
+        {/* HUD de Datos Consolidados */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-left">
           <NeoCard title="ESTADO SISTEMA" value={loading ? "..." : data.estado_sistema} status="KERNEL" variant="cyan" />
           <NeoCard title="BALANCE GLOBAL" value={loading ? "..." : `$${data.balance.global}`} status="USDT" variant="amber" />
