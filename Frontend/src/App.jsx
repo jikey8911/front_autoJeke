@@ -19,7 +19,7 @@ function App() {
     setBackendStatus("SYNCING...");
     try {
       const { data: jsonResponse, error } = await platformAPI.getAllDashboardData();
-      
+
       if (!error) {
         console.log("[Frontend] Respuesta desde Middleware (/api/all):", jsonResponse);
         setData(jsonResponse);
@@ -38,7 +38,6 @@ function App() {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
     fetchAllData();
-    
     const interval = setInterval(fetchAllData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -70,7 +69,7 @@ function App() {
           </ul>
         ) : (
           <div className="flex flex-col items-center justify-center h-20 opacity-50 italic text-xs">
-            <p>No hay datos disponibles</p>
+            <p>Sincronizando...</p>
           </div>
         )}
       </div>
@@ -80,15 +79,14 @@ function App() {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-start overflow-x-hidden bg-neo-bg py-10 text-neo-cyan font-sans">
       <canvas id="neural" className="fixed inset-0 z-0 opacity-40 pointer-events-none" />
-
       <div className="z-10 text-center space-y-8 p-4 w-full max-w-7xl">
         <header className="mb-10">
           <h1 className="text-5xl md:text-7xl font-black text-glow-cyan uppercase tracking-tighter drop-shadow-md inline-block">
             Omni-Revenue
           </h1>
           <div className="h-1 w-full bg-gradient-to-r from-transparent via-neo-cyan to-transparent mt-2" />
-          <p className="text-neo-cyan/70 tracking-[0.5em] uppercase text-[10px] font-black mt-3">
-            Business Intelligence OS • v2.1
+          <p className="text-neo-cyan/70 tracking-[0.5em] uppercase text-[10px] font-black mt-3 text-center w-full">
+            Autonomous Business OS
           </p>
         </header>
 
@@ -97,46 +95,41 @@ function App() {
             {loading ? "PROCESSING..." : "FORCE SYNC"}
           </NeoButton>
           <div className="flex items-center space-x-4 text-[10px] font-black font-mono text-neo-cyan/60 uppercase tracking-widest bg-neo-cyan/5 px-4 py-1 rounded-full border border-neo-cyan/10">
-            <span>Server: <span className={backendStatus === "CONNECTED" ? "text-neo-cyan" : "text-neo-magenta"}>{backendStatus}</span></span>
+            <span>Status: <span className={backendStatus === "CONNECTED" ? "text-neo-cyan" : "text-neo-magenta"}>{backendStatus}</span></span>
             <span className="opacity-30">|</span>
-            <span>Refreshed: {new Date().toLocaleTimeString()}</span>
+            <span>Clock: {new Date().toLocaleTimeString()}</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-left">
-          <NeoCard title="SISTEMA KERNEL" value={data.estado_sistema} status="ONLINE" variant="cyan" />
-          <NeoCard title="BALANCE GLOBAL" value={`$${data.balance.global.toFixed(2)}`} status="USDT" variant="amber" />
-          <NeoCard title="OPORTUNIDADES" value={data.oportunidades_globales} status="LIST" variant="magenta" />
-          <NeoCard title="GATEWAY CLOUD" value={data.estado_gateway} status="OK" variant="cyan" />
+          <NeoCard title="KERNEL STATUS" value={data.estado_sistema} status="ONLINE" variant="cyan" />
+          <NeoCard title="TOTAL BALANCE" value={`$${data.balance.global.toFixed(2)}`} status="USDT" variant="amber" />
+          <NeoCard title="OPPORTUNITIES" value={data.oportunidades_globales} status="LIST" variant="magenta" />
+          <NeoCard title="GATEWAY" value={data.estado_gateway} status="STABLE" variant="cyan" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 w-full text-left">
           <div className="p-5 border border-neo-cyan/30 rounded bg-neo-bg/90 backdrop-blur-md flex flex-col shadow-lg shadow-neo-cyan/10">
-             <h3 className="text-neo-cyan font-bold tracking-widest mb-5 border-b border-neo-cyan/30 pb-2 uppercase text-xs">
-                Unidades Autónomas (UAE)
-             </h3>
-             <div className="space-y-4">
-               <div className="flex justify-between items-end border-b border-neo-cyan/10 pb-1">
-                  <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Activas</span>
-                  <span className="text-2xl font-black text-neo-cyan leading-none">{data.uaes.activas}</span>
-               </div>
-               <div className="flex justify-between items-end border-b border-neo-cyan/10 pb-1">
-                  <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Inactivas</span>
-                  <span className="text-2xl font-black text-neo-amber leading-none">{data.uaes.inactivas}</span>
-               </div>
-               <div className="flex justify-between items-end border-b border-neo-cyan/10 pb-1">
-                  <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Escaladas</span>
-                  <span className="text-2xl font-black text-neo-cyan leading-none">{data.uaes.duplicadas}</span>
-               </div>
-               <div className="flex justify-between items-end">
-                  <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Eliminadas</span>
-                  <span className="text-2xl font-black text-neo-magenta leading-none">{data.uaes.muertas}</span>
-               </div>
-             </div>
+            <h3 className="text-neo-cyan font-bold tracking-widest mb-5 border-b border-neo-cyan/30 pb-2 uppercase text-xs">
+              Unit Monitoring (UAE)
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-end border-b border-neo-cyan/10 pb-1">
+                <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Active</span>
+                <span className="text-2xl font-black text-neo-cyan">{data.uaes.activas}</span>
+              </div>
+              <div className="flex justify-between items-end border-b border-neo-cyan/10 pb-1">
+                <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Scaling</span>
+                <span className="text-2xl font-black text-neo-cyan">{data.uaes.duplicadas}</span>
+              </div>
+              <div className="flex justify-between items-end">
+                <span className="text-neo-cyan/60 text-[10px] font-black uppercase">Terminated</span>
+                <span className="text-2xl font-black text-neo-magenta">{data.uaes.muertas}</span>
+              </div>
+            </div>
           </div>
-
-          {renderList("Núcleo de Agentes", data.agentes_globales)}
-          {renderList("Distribución de Capital", data.balance.uaes)}
+          {renderList("Core Agents", data.agentes_globales)}
+          {renderList("Capital Distribution", data.balance.uaes)}
         </div>
       </div>
     </div>
