@@ -9,43 +9,52 @@ import uvicorn
 
 # --- CONFIGURACIÓN ---
 TOKEN = "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM"
-GROUP_ID = -1003928165700
+# IMPORTANTE: El ID de grupo debe ser un entero (int) para evitar errores de parseo
+GROUP_ID = -1003928165700 
 
-# Inicialización de FastAPI y Aiogram
-app = FastAPI()
+app = FastAPI(title="OmniRadar Telegram Bridge")
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher()
 
-# Modelo de datos para la API
 class TelegramMessage(BaseModel):
     message: str
 
 # --- ENDPOINT API ---
 @app.post("/api/telegram")
 async def send_to_telegram(payload: TelegramMessage):
-    """
-    Recibe un JSON: {"message": "Tu texto aquí"}
-    y lo envía al grupo de Telegram definido.
-    """
     try:
-        # Formateo estilo consola para mantener la estética del sistema
-        formatted_text = f"```\n📡 DATA_INCOMING\n----------------\n{payload.message}\n```"
+        # Estética de consola para el BI OS v3.0
+        formatted_text = (
+            f"```\n"
+            f"📡 DATA_INCOMING\n"
+            f"----------------\n"
+            f"{payload.message}\n"
+            f"```"
+        )
         
         await bot.send_message(chat_id=GROUP_ID, text=formatted_text)
         return {"status": "success", "sent": True}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error enviando a Telegram: {str(e)}")
+        # Captura el error real de Telegram para debug
+        print(f"❌ Telegram Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 # --- CICLO DE VIDA ---
 @app.on_event("startup")
 async def startup_event():
-    # Esto permite que el bot envíe un mensaje de "Sistemas Listos" al iniciar
     try:
         await bot.send_message(chat_id=GROUP_ID, text="✅ **API Gateway: Telegram Bridge Online**")
-    except:
-        print("Error al conectar con el grupo. Verifica que el bot sea administrador.")
+        print("🚀 Conexión con Telegram establecida exitosamente.")
+    except Exception as e:
+        print(f"⚠️ Alerta de inicio: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Limpieza: cerrar la sesión del bot al apagar el servidor
+    await bot.session.close()
+    print("🛑 Servidor apagado y sesión de Telegram cerrada.")
 
 # --- EJECUCIÓN ---
 if __name__ == "__main__":
-    # Ejecuta el servidor en el puerto 8000
+    # Host 0.0.0.0 para que sea accesible desde otros contenedores o UAEs
     uvicorn.run(app, host="0.0.0.0", port=8000)
