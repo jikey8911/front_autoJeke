@@ -1,75 +1,51 @@
-import asyncio
 import os
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart, Command
+import asyncio
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from fastapi import APIRouter
-from pydantic import BaseModel
+import uvicorn
 
-# ⚙️ Configuración
+# --- CONFIGURACIÓN ---
 TOKEN = os.getenv("TELEGRAM_TOKEN", "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM")
-OMNIRADAR_GROUP_ID = "@OmniRadar_trade" # Usando el alias público para evitar el bug del ID de Telegram
+GROUP_ID = "@OmniRadar_trade"
 
+# Inicialización de FastAPI y Aiogram
+app = FastAPI()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher()
 
-# --- RUTAS API PARA ENVIAR MENSAJES DESDE OTRAS UAEs ---
-telegram_router = APIRouter()
+# Modelo de datos para la API
+class TelegramMessage(BaseModel):
+    message: str
 
-class SignalPayload(BaseModel):
-    text: str
-
-@telegram_router.post("/signal")
-async def send_signal_to_group(payload: SignalPayload):
+# --- ENDPOINT API ---
+@app.post("/api/telegram")
+async def send_to_telegram(payload: TelegramMessage):
     """
-    Endpoint para que la UAE_01 envíe señales.
-    El Backend recibe el POST y el Bot de Telegram lo publica en el grupo.
+    Recibe un JSON: {"message": "Tu texto aquí"}
+    y lo envía al grupo de Telegram definido.
     """
     try:
-        await bot.send_message(chat_id=OMNIRADAR_GROUP_ID, text=payload.text)
-        return {"status": "success", "message": "Señal enviada al grupo OmniRadar"}
+        # Formateo estilo consola para mantener la estética del sistema
+        formatted_text = f"```\n📡 DATA_INCOMING\n----------------\n{payload.message}\n```"
+        
+        await bot.send_message(chat_id=GROUP_ID, text=formatted_text)
+        return {"status": "success", "sent": True}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=f"Error enviando a Telegram: {str(e)}")
 
-# 🎯 Handlers de Comandos Directos
-@dp.message(CommandStart())
-async def cmd_start(message: types.Message):
-    await message.answer(
-        f"🤖 ¡Hola {message.from_user.first_name}! Soy OmniRadarAI.\n\n"
-        f"✅ Sistemas en línea (BI OS v3.0).\n"
-        f"📡 Control de Misión establecido."
-    )
-
-@dp.message(Command("status"))
-async def cmd_status(message: types.Message):
+# --- CICLO DE VIDA ---
+@app.on_event("startup")
+async def startup_event():
+    # Esto permite que el bot envíe un mensaje de "Sistemas Listos" al iniciar
     try:
-        with open("/root/.openclaw/workspace/global/balances.md", "r") as f:
-            status_text = f.read()
-        status_text_escaped = status_text.replace("_", "\\_")
-        await message.answer(f"📊 *Estado del Sistema:*\n\n{status_text_escaped}")
+        await bot.send_message(chat_id=GROUP_ID, text="✅ **API Gateway: Telegram Bridge Online**")
     except:
-        await message.answer("⚠️ No se pudo leer el archivo de balances.")
+        print("Error al conectar con el grupo. Verifica que el bot sea administrador.")
 
-# 🔄 Bucle principal de ejecución
-async def start_telegram_bot():
-    print("✅ [OmniRadarAI] Bot interactivo iniciado (Aiogram Polling)...")
-    
-    # FORZAR CONFIGURACIÓN DEL MENÚ DIRECTAMENTE DESDE EL BACKEND
-    from aiogram.types import BotCommand
-    await bot.set_my_commands([
-        BotCommand(command="start", description="Iniciar conexión OmniRadar"),
-        BotCommand(command="status", description="Ver estado del BI OS")
-    ])
-    print("✅ Menú de Telegram configurado exitosamente.")
-
-    # Enviar mensaje de inicio de sesión al grupo
-    try:
-        startup_msg = "🚀 SISTEMA OMNIRADAR ONLINE\n\n✅ Conexion con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando senales de la UAE 01..."
-        await bot.send_message(chat_id=OMNIRADAR_GROUP_ID, text=startup_msg)
-        print("✅ Mensaje de inicio enviado al grupo.")
-    except Exception as e:
-        print(f"⚠️ Error enviando mensaje al grupo: {e}")
-
-    await bot.delete_webhook(drop_pending_updates=True) 
-    await dp.start_polling(bot)
+# --- EJECUCIÓN ---
+if __name__ == "__main__":
+    # Ejecuta el servidor en el puerto 8000
+    uvicorn.run(app, host="0.0.0.0", port=8000)
