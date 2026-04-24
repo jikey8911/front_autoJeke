@@ -54,6 +54,14 @@ async def cmd_status(message: types.Message):
 async def start_telegram_bot():
     print("✅ [OmniRadarAI] Bot interactivo iniciado (Aiogram Polling)...")
     
+    # FORZAR CONFIGURACIÓN DEL MENÚ DIRECTAMENTE DESDE EL BACKEND
+    from aiogram.types import BotCommand
+    await bot.set_my_commands([
+        BotCommand(command="start", description="Iniciar conexión OmniRadar"),
+        BotCommand(command="status", description="Ver estado del BI OS")
+    ])
+    print("✅ Menú de Telegram configurado exitosamente.")
+
     # Enviar mensaje de inicio de sesión al grupo
     try:
         startup_msg = "🚀 **SISTEMA OMNIRADAR ONLINE**\n\n✅ Conexión con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando señales de la UAE_01..."
