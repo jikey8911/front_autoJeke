@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, APIRouter
 from contextlib import asynccontextmanager
 import asyncio
-from services.telegram_service import dp, bot, start_telegram_bot
+from services.telegram_service import dp, bot, start_telegram_bot, telegram_router
 from services.openclaw_gateway import start_openclaw_gateway
 from services.api_service import router as api_all_router
 # --- LIFESPAN PARA MANEJAR TAREAS EN BACKGROUND ---
@@ -29,6 +29,7 @@ async def health_check():
 
 app.include_router(api_router, prefix="/api")
 app.include_router(api_all_router, prefix="/api")
+app.include_router(telegram_router, prefix="/api/telegram")
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
