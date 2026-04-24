@@ -4,8 +4,8 @@
  * Vite intercepta '/api/*' y lo envía al Backend 5000.
  */
 
-// Centralizamos la URL base por si a futuro requerimos cambiarla o añadir variables de entorno
-const API_BASE_URL = '/api';
+// Configuramos explícitamente al dev server de Vite
+const API_BASE_URL = 'http://127.0.0.1:3000/api';
 
 /**
  * Función middleware central para manejar peticiones, logs y formateo de fallos.

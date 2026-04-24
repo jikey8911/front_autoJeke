@@ -22,7 +22,7 @@ export default defineConfig({
     port: 3000, strictPort: true, // Vite ahora corre nativamente en el puerto 3000
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:5000',
+        target: process.env.BACKEND_URL || 'http://automata_backend:5000', // IP (172.21.0.2) o hostname del contenedor del backend
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
