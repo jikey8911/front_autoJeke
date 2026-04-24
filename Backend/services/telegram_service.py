@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 # ⚙️ Configuración
 TOKEN = os.getenv("TELEGRAM_TOKEN", "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM")
-OMNIRADAR_GROUP_ID = -1003928165700 # ID del grupo Trade_Signals_OmniRadar
+OMNIRADAR_GROUP_ID = "@OmniRadar_trade" # Usando el alias público para evitar el bug del ID de Telegram
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher()
