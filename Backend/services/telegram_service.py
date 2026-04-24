@@ -65,7 +65,7 @@ async def start_telegram_bot():
 
     # Enviar mensaje de inicio de sesión al grupo
     try:
-        startup_msg = "🚀 *SISTEMA OMNIRADAR ONLINE*\n\n✅ Conexión con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando señales de la UAE 01..."
+        startup_msg = "🚀 SISTEMA OMNIRADAR ONLINE\n\n✅ Conexion con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando senales de la UAE 01..."
         await bot.send_message(chat_id=OMNIRADAR_GROUP_ID, text=startup_msg)
         print("✅ Mensaje de inicio enviado al grupo.")
     except Exception as e:
