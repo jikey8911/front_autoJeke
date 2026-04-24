@@ -24,7 +24,7 @@ export default defineConfig({
       '/api': {
         target: process.env.BACKEND_URL || 'http://automata_backend:5000', // IP (172.21.0.2) o hostname del contenedor del backend
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        // rewrite: (path) => path.replace(/^\/api/, ''), // Se elimina el rewrite porque el backend recibe rutas con el prefijo /api/
       },
     },
   },
