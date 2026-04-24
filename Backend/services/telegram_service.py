@@ -8,8 +8,8 @@ from aiogram.enums import ParseMode
 import uvicorn
 
 # --- CONFIGURACIÓN ---
-TOKEN = os.getenv("TELEGRAM_TOKEN", "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM")
-GROUP_ID = "@OmniRadar_trade"
+TOKEN = "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM"
+GROUP_ID = -1003928165700
 
 # Inicialización de FastAPI y Aiogram
 app = FastAPI()
