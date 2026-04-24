@@ -5,7 +5,7 @@
  */
 
 // Configuramos explícitamente al dev server de Vite
-const API_BASE_URL = 'http://127.0.0.1:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 /**
  * Función middleware central para manejar peticiones, logs y formateo de fallos.
