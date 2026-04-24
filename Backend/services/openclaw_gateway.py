@@ -13,8 +13,9 @@ async def send_message_to_agent(agent_name: str, message: str) -> str:
     endpoint = f"{OPENCLAW_GATEWAY_URL}/api/v1/chat"
     
     payload = {
-        "agent": agent_name, # O la convención de llaves que use tu OpenClaw API
-        "prompt": message
+        "agent": agent_name,
+        "prompt": message,
+        "model": "llama-small" # Modelo ágil para consultas puramente informativas (llama3.2:1b)
     }
     headers = {
         "Content-Type": "application/json",
