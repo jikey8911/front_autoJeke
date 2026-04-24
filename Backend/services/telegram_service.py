@@ -46,7 +46,8 @@ async def cmd_status(message: types.Message):
     try:
         with open("/root/.openclaw/workspace/global/balances.md", "r") as f:
             status_text = f.read()
-        await message.answer(f"📊 **Estado del Sistema:**\n\n{status_text}")
+        status_text_escaped = status_text.replace("_", "\\_")
+        await message.answer(f"📊 *Estado del Sistema:*\n\n{status_text_escaped}")
     except:
         await message.answer("⚠️ No se pudo leer el archivo de balances.")
 
@@ -64,7 +65,7 @@ async def start_telegram_bot():
 
     # Enviar mensaje de inicio de sesión al grupo
     try:
-        startup_msg = "🚀 **SISTEMA OMNIRADAR ONLINE**\n\n✅ Conexión con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando señales de la UAE_01..."
+        startup_msg = "🚀 *SISTEMA OMNIRADAR ONLINE*\n\n✅ Conexión con el BI OS v3.0 establecida desde el Backend Central.\n📡 Esperando señales de la UAE 01..."
         await bot.send_message(chat_id=OMNIRADAR_GROUP_ID, text=startup_msg)
         print("✅ Mensaje de inicio enviado al grupo.")
     except Exception as e:
