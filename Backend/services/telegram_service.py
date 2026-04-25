@@ -5,6 +5,7 @@ from aiogram.enums import ParseMode
 from aiogram.types import BotCommand
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+import httpx
 
 # --- CONFIGURACIÓN ---
 TOKEN = "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM"
@@ -31,10 +32,16 @@ async def send_to_telegram(payload: TelegramMessage):
         print(f"❌ Error en API Telegram: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def send_simple_msg(text):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": GROUP_ID, "text": text, "parse_mode": "Markdown"}
+    async with httpx.AsyncClient() as client:
+        await client.post(url, json=payload)
+
 # 3. Función principal para el Background Task en main.py
 async def start_telegram_bot():
     """Inicia el bot y envía notificaciones de activación"""
-    
+    send_simple_msg("🚀 **Sistemas OmniRadar Online**")
     # Configurar el menú de comandos para que aparezca el botón [/] en tu chat
     await bot.set_my_commands([
         BotCommand(command="start", description="Reiniciar conexión"),
