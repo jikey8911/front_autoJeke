@@ -26,7 +26,7 @@ async def send_to_telegram(payload: TelegramMessage):
     try:
         # El bloque de código ``` protege el contenido de errores de parsing de Markdown
         formatted_text = f"```\n📡 DATA_INCOMING\n----------------\n{payload.message}\n```"
-        await bot.send_message(chat_id=GROUP_ID, text=formatted_text)
+        await bot.send_message(chat_id=USER_ID_PERSONAL, text=formatted_text)
         return {"status": "success"}
     except Exception as e:
         print(f"❌ Error en API Telegram: {e}")
@@ -41,7 +41,7 @@ async def send_simple_msg(text):
 # 3. Función principal para el Background Task en main.py
 async def start_telegram_bot():
     """Inicia el bot y envía notificaciones de activación"""
-    send_simple_msg("🚀 **Sistemas OmniRadar Online**")
+    await send_simple_msg("🚀 **Sistemas OmniRadar Online**")
     # Configurar el menú de comandos para que aparezca el botón [/] en tu chat
     await bot.set_my_commands([
         BotCommand(command="start", description="Reiniciar conexión"),
