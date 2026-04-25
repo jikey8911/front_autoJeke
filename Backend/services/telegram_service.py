@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # --- CONFIGURACIÓN ---
 TOKEN = "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM"
 GROUP_ID = -1003928165700 
-USER_ID_PERSONAL = 8591803663
+USER_ID_PERSONAL = 8503241862
 
 # 1. Instancias necesarias para exportar
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
