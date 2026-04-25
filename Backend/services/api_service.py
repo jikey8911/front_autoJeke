@@ -8,16 +8,16 @@ router = APIRouter()
 async def get_all_data():
     """
     Endpoint unificado.
-    Solicita asíncronamente a INTERFACEAGENT (mapeado a comunication) la información en el formato predefinido.
+    Solicita asíncronamente al agente de comunicación la información en el formato predefinido.
     """
-    # Mapeo de INTERFACEAGENT hacia el agente real
-    target_agent = "comunication" if agent_name.upper() == "INTERFACEAGENT" else agent_name
+    # El Dashboard busca datos holísticos, delegamos al agente 'comunication'
+    target_agent = "comunication"
     
     # Prompt optimizado para reporte estricto v3.0
     prompt = (
         "Genera un reporte de estado técnico del BI OS v3.0. "
         "Necesito: balance global consolidado, conteo total de carpetas en /uaes/ y conteo de misiones en oportunidades_global.md. "
-        "Devuelve ÚNICAMENTE un JSON con este formato exacto, sin markdown: "
+        "Devuelve ÚNICAMENTE un JSON con este formato exacto, sin bloques de código ni texto extra: "
         '{"balance": "36.02", "uaes_activas": 21, "oportunidades": 14}'
     )
     
