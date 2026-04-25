@@ -23,7 +23,9 @@ async def get_all_data():
     
     try:
         # Espera asíncrona de la respuesta del agente
-        agent_response_text = await send_message_to_agent("INTERFACEAGENT", prompt)
+        # agent_name recibido del frontend suele ser INTERFACEAGENT, lo mapeamos a 'comunication'
+        target_agent = "comunication" if agent_name.upper() == "INTERFACEAGENT" else agent_name
+        agent_response_text = await send_message_to_agent(target_agent, prompt)
         
         # Limpiamos posibles formatos de markdown (```json ... ```) si el modelo los añade
         cleaned_text = agent_response_text.replace("```json", "").replace("```", "").strip()
