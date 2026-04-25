@@ -35,8 +35,12 @@ async def send_to_telegram(payload: TelegramMessage):
 async def send_simple_msg(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {"chat_id": USER_ID_PERSONAL, "text": text, "parse_mode": "Markdown"}
-    async with httpx.AsyncClient() as client:
-        await client.post(url, json=payload)
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+    except Exception as e:
+        print(f"❌ Error al enviar mensaje simple por Telegram: {e}")
 
 # 3. Función principal para el Background Task en main.py
 async def start_telegram_bot():
