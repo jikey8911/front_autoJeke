@@ -54,9 +54,9 @@ function App() {
   useEffect(() => {
     const canvas = document.getElementById("neural");
     if (canvas) initNeural(canvas);
+    
+    // Ejecutamos la petición solo una vez al iniciar la vista
     fetchAllData();
-    const interval = setInterval(fetchAllData, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const renderList = (title, items) => (
