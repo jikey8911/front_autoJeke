@@ -20,12 +20,31 @@ function App() {
     try {
       const { data: jsonResponse, error } = await platformAPI.getAllDashboardData();
 
-      if (!error) {
+      if (!error && jsonResponse.status === "success") {
         console.log("[Frontend] Respuesta desde Middleware (/api/all):", jsonResponse);
-        setData(jsonResponse);
+        const apiData = jsonResponse.data;
+        
+        // Mapeamos los valores planos de la API al estado estructurado del Front
+        setData({
+          estado_sistema: "ACTIVE v3.0",
+          estado_gateway: "STABLE",
+          balance: { 
+            global: parseFloat(apiData.balance) || 0.0, 
+            uaes: [] 
+          },
+          agentes_globales: ["CEO", "RESEARCHER", "ARCHITECT", "BROKER", "COMM"],
+          uaes: { 
+            activas: parseInt(apiData.uaes_activas) || 0, 
+            inactivas: 0, 
+            duplicadas: 0, 
+            muertas: 0 
+          },
+          oportunidades_globales: parseInt(apiData.oportunidades) || 0
+        });
+        
         setBackendStatus("CONNECTED");
       } else {
-        setBackendStatus(error);
+        setBackendStatus(error || "API ERROR");
       }
     } catch (err) {
       console.error("[Frontend] Excepción en UI atrapada:", err);
