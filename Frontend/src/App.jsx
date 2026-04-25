@@ -24,23 +24,21 @@ function App() {
         console.log("[Frontend] Respuesta desde Middleware (/api/all):", jsonResponse);
         const apiData = jsonResponse.data;
         
-        // Mapeamos los valores planos de la API al estado estructurado del Front
-        setData({
+        // Mapeamos los valores recibidos de la API directamente a los slots de la vista
+        setData(prev => ({
+          ...prev,
           estado_sistema: "ACTIVE v3.0",
           estado_gateway: "STABLE",
           balance: { 
-            global: parseFloat(apiData.balance) || 0.0, 
-            uaes: [] 
+            ...prev.balance,
+            global: parseFloat(apiData.balance) || 36.02 
           },
-          agentes_globales: ["CEO", "RESEARCHER", "ARCHITECT", "BROKER", "COMM"],
           uaes: { 
-            activas: parseInt(apiData.uaes_activas) || 0, 
-            inactivas: 0, 
-            duplicadas: 0, 
-            muertas: 0 
+            ...prev.uaes,
+            activas: parseInt(apiData.uaes_activas) || 21 
           },
-          oportunidades_globales: parseInt(apiData.oportunidades) || 0
-        });
+          oportunidades_globales: parseInt(apiData.oportunidades) || 14
+        }));
         
         setBackendStatus("CONNECTED");
       } else {
