@@ -26,7 +26,7 @@ async def send_to_telegram(payload: TelegramMessage):
     try:
         # El bloque de código ``` protege el contenido de errores de parsing de Markdown
         formatted_text = f"```\n📡 DATA_INCOMING\n----------------\n{payload.message}\n```"
-        await bot.send_message(chat_id=USER_ID_PERSONAL, text=formatted_text)
+        await bot.send_message(chat_id=GROUP_ID, text=formatted_text)
         return {"status": "success"}
     except Exception as e:
         print(f"❌ Error en API Telegram: {e}")
@@ -34,7 +34,7 @@ async def send_to_telegram(payload: TelegramMessage):
 
 async def send_simple_msg(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": GROUP_ID, "text": text, "parse_mode": "Markdown"}
+    payload = {"chat_id": USER_ID_PERSONAL, "text": text, "parse_mode": "Markdown"}
     async with httpx.AsyncClient() as client:
         await client.post(url, json=payload)
 
