@@ -13,7 +13,12 @@ async def send_message_to_agent(agent_name: str, message: str) -> str:
     endpoint = f"{OPENCLAW_GATEWAY_URL}/v1/chat/completions"
     
     # OpenClaw requiere que el modelo sea 'openclaw/<agentId>'
-    model_id = f"openclaw/{agent_name.lower()}"
+    # Forzamos minúsculas para el agent_name en la URL del modelo
+    target_agent_id = agent_name.lower()
+    if target_agent_id == "interfaceagent":
+        target_agent_id = "comunication"
+        
+    model_id = f"openclaw/{target_agent_id}"
     
     payload = {
         "model": model_id,
