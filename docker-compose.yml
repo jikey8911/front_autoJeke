@@ -32,8 +32,49 @@ services:
     networks:
       - automata_net
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - automata_net
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      - ollama
+    networks:
+      - automata_net
+    entrypoint: /bin/sh
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    command: >
+      -c "
+      echo 'Esperando a que Ollama inicie...';
+      sleep 10;
+      echo 'Descargando qwen2.5:7b...';
+      ollama pull qwen2.5:7b;
+      echo 'Descargando gemma:7b...';
+      ollama pull gemma:7b;
+      echo 'Descargando llama3.2:1b...';
+      ollama pull llama3.2:1b;
+      echo 'Descargando qwen2.5-coder:7b...';
+      ollama pull qwen2.5-coder:7b;
+      echo 'Descargando codellama:latest...';
+      ollama pull codellama:latest;
+      echo 'Todos los modelos descargados exitosamente.'
+      "
+
 # Usamos la red externa donde corre OpenClaw
 networks:
   automata_net:
     name: automataopenclaw_automata_net
     external: true
+
+volumes:
+  ollama_data:
