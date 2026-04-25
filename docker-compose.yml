@@ -61,8 +61,8 @@ services:
       ollama pull qwen2.5:7b;
       echo 'Descargando gemma:7b...';
       ollama pull gemma:7b;
-      echo 'Descargando llama3.2:1b...';
-      ollama pull llama3.2:1b;
+      echo 'Descargando llama3.2:3b...';
+      ollama pull llama3.2:3b;
       echo 'Descargando qwen2.5-coder:7b...';
       ollama pull qwen2.5-coder:7b;
       echo 'Descargando codellama:latest...';
