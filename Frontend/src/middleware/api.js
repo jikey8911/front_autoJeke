@@ -4,8 +4,10 @@
  * Vite intercepta '/api/*' y lo envía al Backend 5000.
  */
 
-// Configuramos explícitamente al dev server de Vite
-const API_BASE_URL = 'http://localhost:3000/api';
+// Configuramos la URL base. 
+// En producción (dentro de Docker), las peticiones deben ser relativas al host del cliente (navegador).
+// El proxy de Vite se encarga de redirigir '/api' al backend.
+const API_BASE_URL = '/api';
 
 /**
  * Función middleware central para manejar peticiones, logs y formateo de fallos.
