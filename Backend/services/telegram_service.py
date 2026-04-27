@@ -32,20 +32,11 @@ async def send_to_telegram(payload: TelegramMessage):
         print(f"❌ Error en API Telegram: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def send_simple_msg(text):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": USER_ID_PERSONAL, "text": text, "parse_mode": "Markdown"}
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload)
-            response.raise_for_status()
-    except Exception as e:
-        print(f"❌ Error al enviar mensaje simple por Telegram: {e}")
+
 
 # 3. Función principal para el Background Task en main.py
 async def start_telegram_bot():
     """Inicia el bot y envía notificaciones de activación"""
-    await send_simple_msg("🚀 **Sistemas OmniRadar Online**")
     # Configurar el menú de comandos para que aparezca el botón [/] en tu chat
     await bot.set_my_commands([
         BotCommand(command="start", description="Reiniciar conexión"),
