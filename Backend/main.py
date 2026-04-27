@@ -14,9 +14,6 @@ from services.api_service import router as api_all_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("🚀 Levantando servicio de Telegram...")
-    # Esto dispara la función que ahora incluye tu saludo personal
-    bg_task_tg = asyncio.create_task(start_telegram_bot())
-    
     # Iniciar tareas en background
     bg_task_tg = asyncio.create_task(start_telegram_bot())
     bg_task_oc = asyncio.create_task(start_openclaw_gateway())
