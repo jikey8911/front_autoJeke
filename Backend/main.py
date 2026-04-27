@@ -77,6 +77,6 @@ app.include_router(api_all_router, prefix="/api")
 app.include_router(telegram_router, prefix="/api/telegram")
 
 if __name__ == "__main__":
-    # Nota: El puerto 5000 es común para Flask, 8000 para FastAPI. 
-    # Mantengo tu puerto 5000.
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
+    # En producción/Docker esto lo lanza el Dockerfile. 
+    # Solo para debug local sin reload.
+    uvicorn.run("main:app", host="0.0.0.0", port=5000)
