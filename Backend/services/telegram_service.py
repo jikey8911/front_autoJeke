@@ -19,15 +19,16 @@ telegram_router = APIRouter()
 
 class TelegramMessage(BaseModel):
     message: str
+    target: str = "group"  # 'group' o 'private'
 
 # 2. Router para el endpoint de la API
 @telegram_router.post("/")
 async def send_to_telegram(payload: TelegramMessage):
     try:
-        # El bloque de código ``` protege el contenido de errores de parsing de Markdown
         formatted_text = f"```\n📡 DATA_INCOMING\n----------------\n{payload.message}\n```"
-        await bot.send_message(chat_id=GROUP_ID, text=formatted_text)
-        return {"status": "success"}
+        chat_target = USER_ID_PERSONAL if payload.target == "private" else GROUP_ID
+        await bot.send_message(chat_id=chat_target, text=formatted_text)
+        return {"status": "success", "target": payload.target}
     except Exception as e:
         print(f"❌ Error en API Telegram: {e}")
         raise HTTPException(status_code=500, detail=str(e))
