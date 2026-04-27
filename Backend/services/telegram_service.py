@@ -8,7 +8,7 @@ from pydantic import BaseModel
 import httpx
 
 # --- CONFIGURACIÓN ---
-TOKEN = "8227761535:AAFIGpUjlLAoSR71eiwxsfS6Cun2uDukTTM"
+TOKEN = "8227761535:AAHoHzx4J-kPDyye7ClXkhcG_pAvELcqTEM"
 GROUP_ID = -1003928165700 
 USER_ID_PERSONAL = 8503241862
 
